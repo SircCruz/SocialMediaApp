@@ -200,7 +200,12 @@ p.home-contents {
     width: 40%;
 }
 .settings_password-errormessage {
-    width: 50%;
+   width: 50%;
+}
+@media (max-width: 450px) {
+    .input_password , .settings_password-errormessage{
+        width: 100%;
+    }
 }
 .settings_password-errormessage {
     display: inline-block;
