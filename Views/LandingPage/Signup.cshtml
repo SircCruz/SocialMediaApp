@@ -86,7 +86,7 @@
                 type: 'POST',
                 url: "../AccountsModels/CreateAccount?username=" + $("#usr").val() + "&password=" + $("#pwd").val(),
                 success: function() {
-                    location.href = "../Home/Feed";
+                    location.href = "../PostsModels/Feed";
                 }
             });
         }

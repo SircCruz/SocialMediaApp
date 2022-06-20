@@ -19,168 +19,9 @@ namespace SocialMediaApp.Controllers
         {
             _context = context;
         }
-
-        // GET: PostsModels
-        public async Task<IActionResult> Index()
+        public IActionResult Feed()
         {
-              return _context.PostsModel != null ? 
-                          View(await _context.PostsModel.ToListAsync()) :
-                          Problem("Entity set 'SocialMediaAppContext.PostsModel'  is null.");
-        }
-        // GET: PostsModels/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.PostsModel == null)
-            {
-                return NotFound();
-            }
-
-            var postsModel = await _context.PostsModel
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (postsModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(postsModel);
-        }
-
-        // GET: PostsModels/Create
-        public IActionResult Create()
-        {
-            Console.WriteLine(AccountsModelsController.onAdminMode);
-            if(AccountsModelsController.onAdminMode == false)
-            {
-                return RedirectToAction("Feed", "Home");
-            }
-            else
-            {
-                return View();
-            }
-        }
-
-        // POST: PostsModels/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,post,date,postedBy")] PostsModel postsModel, string post)
-        {
-            Console.WriteLine(AccountsModelsController.onAdminMode);
-            if (ModelState.IsValid)
-            {
-                if(AccountsModelsController.onAdminMode == false)
-                {
-                    _context.Add(PostToFeed(post));
-                }
-                else
-                {
-                    _context.Add(postsModel);
-                }
-                await _context.SaveChangesAsync();
-                if (AccountsModelsController.onAdminMode == false)
-                {
-                    return RedirectToAction("Feed", "Home");
-                }
-                else
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            return View(postsModel);
-        }
-
-        // GET: PostsModels/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.PostsModel == null)
-            {
-                return NotFound();
-            }
-
-            var postsModel = await _context.PostsModel.FindAsync(id);
-            if (postsModel == null)
-            {
-                return NotFound();
-            }
-            return View(postsModel);
-        }
-
-        // POST: PostsModels/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,content,date,postedBy")] PostsModel postsModel)
-        {
-            if (id != postsModel.ID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(postsModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PostsModelExists(postsModel.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(postsModel);
-        }
-
-        // GET: PostsModels/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.PostsModel == null)
-            {
-                return NotFound();
-            }
-
-            var postsModel = await _context.PostsModel
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (postsModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(postsModel);
-        }
-
-        // POST: PostsModels/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.PostsModel == null)
-            {
-                return Problem("Entity set 'SocialMediaAppContext.PostsModel'  is null.");
-            }
-            var postsModel = await _context.PostsModel.FindAsync(id);
-            if (postsModel != null)
-            {
-                _context.PostsModel.Remove(postsModel);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool PostsModelExists(int id)
-        {
-          return (_context.PostsModel?.Any(e => e.ID == id)).GetValueOrDefault();
+            return View();
         }
         public PostsModel PostToFeed(string content)
         {
@@ -204,6 +45,57 @@ namespace SocialMediaApp.Controllers
             _context.SaveChanges();
             Console.WriteLine(p);
             return new JsonResult(p);
+        }
+        [HttpGet]
+        public ActionResult GetFeed()
+        {
+            var q = _context.PostsModel!.ToList();
+            return Json(new { Data = q });
+        }
+        [HttpGet]
+        public ActionResult GetPost(int id)
+        {
+            var q = from p in _context.PostsModel! where p.ID == id select p;
+            return Json(new { Data = q });
+        }
+        [HttpPost]
+        public ActionResult EditPost(int id, string content, PostsModel postModel)
+        {
+            if (postModel is null)
+            {
+                throw new ArgumentNullException(nameof(postModel));
+            }
+
+            postModel = new PostsModel
+            {
+                ID = id,
+                content = content,
+                postedBy = AccountsModelsController._username,
+                date = "Edited " + DateTime.Now.ToString()
+            };
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(postModel);
+                _context.SaveChanges();
+            }
+
+            return Json(new { Data = postModel });
+        }
+        [HttpPost]
+        public ActionResult DeletePost(int id)
+        {
+            var postsModel = _context.PostsModel!.Find(id);
+            if (postsModel != null)
+            {
+                _context.PostsModel.Remove(postsModel);
+                _context.SaveChanges();
+            }
+            return Json(new { Data = postsModel });
+        }
+        public IActionResult Settings()
+        {
+            return View();
         }
     }
 }

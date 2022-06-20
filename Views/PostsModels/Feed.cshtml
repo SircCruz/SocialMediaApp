@@ -118,7 +118,7 @@
             var url = '';
             var method = 'GET';
 
-            if (!getData) url = 'GetFeed';
+            if (!getData) url = '/PostsModels/GetFeed';
             else url = 'GetPost?id=' + id;
 
             $.ajax({
@@ -195,7 +195,7 @@
             });
         }
         function UpdatePost() {
-            var url = "EditPost?id=" + document.getElementById("editid").innerHTML + "&content=" + $("#editpost").val();
+            var url = "/PostsModels/EditPost?id=" + document.getElementById("editid").innerHTML + "&content=" + $("#editpost").val();
             var method = 'POST';
 
             $.ajax({
@@ -210,7 +210,7 @@
             });
         }
         function DeletePost(){
-            var url = 'DeletePost?id=' + document.getElementById("deleteid").innerHTML;
+            var url = '/PostsModels/DeletePost?id=' + document.getElementById("deleteid").innerHTML;
             var method = 'Post';
 
             $.ajax({
