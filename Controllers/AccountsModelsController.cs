@@ -42,7 +42,7 @@ namespace SocialMediaApp.Controllers
                 _id = query.First().ID;
                 _username = query.First().username!;
                 
-                return RedirectToAction("Feed", "Home");
+                return RedirectToAction("Feed", "PostsModels");
             }
             else
             {
